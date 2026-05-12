@@ -1,26 +1,28 @@
 import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
-import BackgroundScene from "../components/ui/three/BackgroundScene";
+import { EcoShell } from "@/components/eco-tech/EcoShell";
+import { GlassPanel } from "@/components/eco-tech/GlassPanel";
+import { ecoPrimaryButton } from "@/components/eco-tech/ecoTheme";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
+    <div className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 py-16">
+      <GlassPanel className="max-w-md p-10 text-center">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.45em] text-cyan-300/80">Signal lost</p>
+        <h1 className="mt-3 bg-gradient-to-r from-cyan-200 via-white to-emerald-200 bg-clip-text text-7xl font-bold tracking-tight text-transparent">
+          404
+        </h1>
+        <h2 className="mt-4 text-xl font-semibold text-white">Sector unavailable</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+          This coordinate does not resolve in the municipal mesh. Return to command overview.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
+        <div className="mt-8">
+          <Link to="/" className={ecoPrimaryButton}>
+            Re-enter Nexus
           </Link>
         </div>
-      </div>
+      </GlassPanel>
     </div>
   );
 }
@@ -30,14 +32,14 @@ export const Route = createRootRoute({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Waste management" },
-      { name: "description", content: "Waste management application" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Waste management" },
-      { property: "og:description", content: "Waste management application" },
+      { title: "Smart Waste Routing" },
+      { name: "description", content: "Futuristic eco-tech waste routing and environmental intelligence" },
+      { name: "author", content: "Waste Management Team" },
+      { property: "og:title", content: "Smart Waste Routing" },
+      { property: "og:description", content: "Eco-tech environmental intelligence for smart cities" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@wastemanagement" },
+      { name: "twitter:site", content: "@waste-management" },
     ],
     links: [
       {
@@ -57,7 +59,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className="dark eco-tech antialiased">
         {children}
         <Scripts />
       </body>
@@ -67,9 +69,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   return (
-    <>
-      <BackgroundScene />
+    <EcoShell>
       <Outlet />
-    </>
+    </EcoShell>
   );
 }

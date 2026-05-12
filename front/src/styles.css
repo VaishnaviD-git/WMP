@@ -132,6 +132,87 @@
   --sidebar-ring: oklch(0.551 0.027 264.364);
 }
 
+/*
+ * Eco-tech smart-city theme: layered over `.dark` for holographic UI surfaces.
+ */
+.eco-tech.dark,
+.eco-tech {
+  --background: oklch(0.11 0.045 260);
+  --foreground: oklch(0.96 0.02 200);
+  --card: oklch(0.18 0.04 250 / 0.42);
+  --card-foreground: oklch(0.96 0.02 200);
+  --popover: oklch(0.14 0.05 255 / 0.92);
+  --popover-foreground: oklch(0.96 0.02 200);
+  --primary: oklch(0.78 0.14 195);
+  --primary-foreground: oklch(0.12 0.05 260);
+  --secondary: oklch(0.22 0.05 250 / 0.65);
+  --secondary-foreground: oklch(0.92 0.03 200);
+  --muted: oklch(0.22 0.04 250 / 0.55);
+  --muted-foreground: oklch(0.72 0.04 230);
+  --accent: oklch(0.72 0.17 165);
+  --accent-foreground: oklch(0.12 0.05 260);
+  --destructive: oklch(0.62 0.22 25);
+  --destructive-foreground: oklch(0.98 0.01 200);
+  --border: oklch(0.55 0.12 195 / 0.35);
+  --input: oklch(0.35 0.06 250 / 0.55);
+  --ring: oklch(0.72 0.15 195);
+  --chart-1: oklch(0.72 0.17 195);
+  --chart-2: oklch(0.72 0.16 165);
+  --chart-3: oklch(0.68 0.14 230);
+  --chart-4: oklch(0.78 0.12 145);
+  --chart-5: oklch(0.62 0.2 25);
+}
+
+@keyframes eco-shimmer {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
+@keyframes eco-pulse-glow {
+  0%,
+  100% {
+    opacity: 0.55;
+    filter: blur(14px);
+  }
+  50% {
+    opacity: 0.95;
+    filter: blur(20px);
+  }
+}
+
+@keyframes eco-scan {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.35;
+  }
+  85% {
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes eco-marker-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 oklch(0.72 0.17 195 / 0.55);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 24px 6px oklch(0.72 0.17 195 / 0.35);
+    transform: scale(1.05);
+  }
+}
+
 @layer base {
   * {
     border-color: var(--color-border);

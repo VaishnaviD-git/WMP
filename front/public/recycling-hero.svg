@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-label="Holographic smart waste management interface">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="50%" stop-color="#0c1929"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <radialGradient id="hubGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.35"/>
+      <stop offset="55%" stop-color="#22d3ee" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.15"/>
+      <stop offset="50%" stop-color="#67e8f9" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0.15"/>
+    </linearGradient>
+    <filter id="softGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="nodeGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="4" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <radialGradient id="vignette" cx="50%" cy="50%" r="65%">
+      <stop offset="60%" stop-color="#000" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.45"/>
+    </radialGradient>
+    <marker id="ecoArrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,5 L0,10 z" fill="#34d399"/>
+    </marker>
+  </defs>
+
+  <rect width="600" height="600" fill="url(#bgGrad)"/>
+  <circle cx="300" cy="300" r="260" fill="url(#hubGlow)"/>
+
+  <!-- Network connector lines -->
+  <g stroke="url(#lineGrad)" stroke-width="1.2" fill="none" opacity="0.75">
+    <line x1="300" y1="300" x2="118" y2="128"/>
+    <line x1="300" y1="300" x2="72" y2="300"/>
+    <line x1="300" y1="300" x2="132" y2="478"/>
+    <line x1="300" y1="300" x2="482" y2="128"/>
+    <line x1="300" y1="300" x2="528" y2="300"/>
+    <line x1="300" y1="300" x2="468" y2="478"/>
+  </g>
+
+  <!-- Peripheral nodes -->
+  <g filter="url(#nodeGlow)">
+    <!-- Top-left: factory + down arrow -->
+    <g transform="translate(118,128)">
+      <circle r="36" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5" opacity="0.92"/>
+      <circle r="36" fill="none" stroke="#67e8f9" stroke-width="0.8" opacity="0.4"/>
+      <path fill="#e2e8f0" d="M-12-8h24v18h-8v8h-8v-8h-8z M-6-14h12v6h-12z"/>
+      <g fill="none" stroke="#22d3ee" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M0 14 L0 28"/>
+        <path d="M-6 22 L0 30 L6 22"/>
+      </g>
+    </g>
+
+    <!-- Mid-left: checklist -->
+    <g transform="translate(72,300)">
+      <circle r="32" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5" opacity="0.92"/>
+      <rect x="-14" y="-16" width="28" height="32" rx="2" fill="none" stroke="#a5f3fc" stroke-width="1.2"/>
+      <path fill="none" stroke="#34d399" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M-8-6l3 3 6-8 M-8 2l3 3 6-8 M-8 10l3 3 6-8"/>
+    </g>
+
+    <!-- Bottom-left: three bins -->
+    <g transform="translate(132,478)">
+      <circle r="34" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5" opacity="0.92"/>
+      <g fill="none" stroke="#e2e8f0" stroke-width="1">
+        <path d="M-18 4h6v12h-6z M-3 4h6v12h-6z M12 4h6v12h-6z"/>
+        <path d="M-18 4h-2v-3h22v3 M3 4h-2v-3h22v3"/>
+      </g>
+    </g>
+
+    <!-- Top-right: leaf -->
+    <g transform="translate(482,128)">
+      <circle r="34" fill="#0f172a" stroke="#34d399" stroke-width="1.5" opacity="0.92"/>
+      <path fill="#34d399" d="M4-10c-12 4-18 14-16 24 8-6 18-8 28-6-2-10-8-16-12-18z"/>
+      <path fill="#4ade80" d="M-2 2c-6 6-8 14-6 20 6-4 10-10 12-16-4-2-6-4-6-4z"/>
+    </g>
+
+    <!-- Mid-right: truck -->
+    <g transform="translate(528,300)">
+      <circle r="36" fill="#0f172a" stroke="#22d3ee" stroke-width="1.5" opacity="0.92"/>
+      <rect x="-20" y="-6" width="22" height="14" rx="1" fill="#334155" stroke="#67e8f9" stroke-width="1"/>
+      <rect x="2" y="-2" width="14" height="10" rx="1" fill="#475569" stroke="#67e8f9" stroke-width="1"/>
+      <circle cx="-12" cy="10" r="3" fill="#1e293b" stroke="#22d3ee" stroke-width="1"/>
+      <circle cx="8" cy="10" r="3" fill="#1e293b" stroke="#22d3ee" stroke-width="1"/>
+    </g>
+
+    <!-- Bottom-right: eco factory -->
+    <g transform="translate(468,478)">
+      <circle r="36" fill="#0f172a" stroke="#34d399" stroke-width="1.5" opacity="0.92"/>
+      <path fill="#e2e8f0" d="M-14-6h28v16h-8v-6h-4v6h-16z M-8-12h6v6h-6z M2-12h6v6h-6z"/>
+      <path fill="#34d399" d="M2-20c2 0 4 2 5 5-3-1-6-1-8 0 1-3 2-5 3-5z"/>
+    </g>
+  </g>
+
+  <!-- Central hub -->
+  <g transform="translate(300,300)" filter="url(#softGlow)">
+    <!-- Outer segmented rings -->
+    <circle r="118" fill="none" stroke="#22d3ee" stroke-width="2" stroke-dasharray="28 18" opacity="0.85"/>
+    <circle r="102" fill="none" stroke="#67e8f9" stroke-width="1" stroke-dasharray="14 22" opacity="0.55"/>
+    <circle r="86" fill="#0f172a" stroke="#22d3ee" stroke-width="2" opacity="0.75"/>
+    <circle r="86" fill="none" stroke="#34d399" stroke-width="0.6" opacity="0.35"/>
+
+    <!-- Recycling arrows: three 120° arcs on radius 52 -->
+    <g fill="none" stroke="#34d399" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.95" marker-end="url(#ecoArrow)">
+      <path d="M 0,-52 A 52 52 0 0 1 45.03,26"/>
+      <path d="M 0,-52 A 52 52 0 0 1 45.03,26" transform="rotate(120)"/>
+      <path d="M 0,-52 A 52 52 0 0 1 45.03,26" transform="rotate(240)"/>
+    </g>
+
+    <!-- Trash can (center) -->
+    <g fill="#f8fafc">
+      <path d="M-22,-18h44v6h-44z M-18,-24h36v6h-36z"/>
+      <path d="M-16,-12h32v42h-32z" fill="none" stroke="#f8fafc" stroke-width="3"/>
+      <line x1="-8" y1="-4" x2="-8" y2="22" stroke="#0f172a" stroke-width="2" opacity="0.35"/>
+      <line x1="0" y1="-4" x2="0" y2="22" stroke="#0f172a" stroke-width="2" opacity="0.35"/>
+      <line x1="8" y1="-4" x2="8" y2="22" stroke="#0f172a" stroke-width="2" opacity="0.35"/>
+    </g>
+
+    <!-- Inner pulse ring -->
+    <circle r="72" fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.25"/>
+  </g>
+
+  <!-- Subtle vignette -->
+  <rect width="600" height="600" fill="url(#vignette)" style="mix-blend-mode: multiply" pointer-events="none"/>
+</svg>

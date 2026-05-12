@@ -1,5 +1,43 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim() || "http://localhost:8000";
 
+/** Absolute backend URL for `fetch` (multipart forms and JSON endpoints). */
+export function apiUrl(path: string): string {
+  const base = API_BASE_URL.replace(/\/$/, "");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}
+
+/** POST `multipart/form-data`; parses JSON body and throws on non-OK responses. */
+export async function postForm(path: string, formData: FormData): Promise<unknown> {
+  const response = await fetch(apiUrl(path), {
+    method: "POST",
+    body: formData,
+  });
+
+  let parsed: unknown = null;
+  try {
+    parsed = await response.json();
+  } catch {
+    parsed = null;
+  }
+
+  if (!response.ok) {
+    let message = `Request failed (${response.status})`;
+    if (parsed && typeof parsed === "object") {
+      const detail = (parsed as Record<string, unknown>).detail;
+      const msg = (parsed as Record<string, unknown>).message;
+      if (typeof detail === "string" && detail.trim()) {
+        message = detail;
+      } else if (typeof msg === "string" && msg.trim()) {
+        message = msg;
+      }
+    }
+    throw new Error(message);
+  }
+
+  return parsed;
+}
+
 type Primitive = string | number | boolean | null;
 type JsonValue = Primitive | JsonValue[] | { [key: string]: JsonValue };
 

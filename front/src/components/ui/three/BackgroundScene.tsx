@@ -44,12 +44,7 @@ function ParticleField() {
   return (
     <points ref={pointsRef}>
       <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          array={positions}
-          count={positions.length / 3}
-          itemSize={3}
-        />
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
         ref={pointMaterialRef}
@@ -62,6 +57,32 @@ function ParticleField() {
         blending={THREE.AdditiveBlending}
       />
     </points>
+  );
+}
+
+function OrbitalEcoRings() {
+  const ref = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (!ref.current) return;
+    const t = clock.getElapsedTime();
+    ref.current.rotation.y = -t * 0.11;
+    ref.current.rotation.x = Math.sin(t * 0.08) * 0.12;
+  });
+  return (
+    <group ref={ref} position={[0, 0.2, -2.2]}>
+      <mesh rotation={[Math.PI / 2.1, 0, 0]}>
+        <torusGeometry args={[3.4, 0.014, 16, 200]} />
+        <meshBasicMaterial color="#22d3ee" transparent opacity={0.35} />
+      </mesh>
+      <mesh rotation={[Math.PI / 2.4, 0.6, 0.3]}>
+        <torusGeometry args={[4.1, 0.012, 16, 220]} />
+        <meshBasicMaterial color="#34d399" transparent opacity={0.28} />
+      </mesh>
+      <mesh rotation={[Math.PI / 2, -0.4, -0.2]}>
+        <torusGeometry args={[4.85, 0.01, 12, 240]} />
+        <meshBasicMaterial color="#67e8f9" transparent opacity={0.2} />
+      </mesh>
+    </group>
   );
 }
 
@@ -132,6 +153,7 @@ export default function BackgroundScene() {
         <pointLight position={[-6, -3, 2]} intensity={1.1} color="#2fffb8" />
         <directionalLight position={[0, 5, 5]} intensity={0.5} color="#9efbff" />
         <ParticleField />
+        <OrbitalEcoRings />
         <EnergySystem />
         <CameraRig />
       </Canvas>

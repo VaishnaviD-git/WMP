@@ -1,9 +1,12 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { LogIn, Leaf } from "lucide-react";
+import { Fingerprint, LogIn, ShieldCheck } from "lucide-react";
 import { useState, type FormEvent } from "react";
-import BackButton from "@/components/BackButton";
-import { login } from "@/lib/api";
+
+import { GlassPanel } from "@/components/eco-tech/GlassPanel";
+import { HolographicStamp } from "@/components/eco-tech/HolographicStamp";
+import { ecoInputClass, ecoLabelClass, ecoLinkClass, ecoPrimaryButton, neonDivider } from "@/components/eco-tech/ecoTheme";
+import { postForm } from "@/lib/api";
 
 export const Route = createFileRoute("/login")({
   component: LoginPage,
@@ -11,130 +14,149 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-
+  const [message, setMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [isError, setIsError] = useState(false);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    setMessage(null);
     setLoading(true);
-    setMessage("");
-    setIsError(false);
-
-    const response = await login({
-      username: username.trim(),
-      password,
-    });
-
-    if (response.ok) {
-      setMessage(response.message);
-      setIsError(false);
-      setLoading(false);
+    try {
+      await postForm("/api/login", formData);
       navigate({ to: "/dashboard" });
-      return;
+    } catch (err) {
+      setMessage(err instanceof Error ? err.message : "Login failed.");
+    } finally {
+      setLoading(false);
     }
-
-    setMessage(response.message);
-    setIsError(true);
-    setLoading(false);
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
-      <BackButton />
+    <main className="relative mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-lg items-center px-4 py-16">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 w-full max-w-md"
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-24 h-52 w-52 -translate-x-1/2 rounded-full bg-cyan-500/20 blur-3xl"
+        animate={{ opacity: [0.35, 0.8, 0.4], scale: [0.95, 1.05, 0.98] }}
+        transition={{ duration: 6, repeat: Infinity }}
+      />
+
+      <motion.div
+        initial={{ opacity: 0, y: 26, filter: "blur(12px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
+        className="relative w-full"
       >
-        <div className="rounded-3xl border border-cyan-400/30 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="mb-6 flex flex-col items-center text-center">
-            <div className="mb-4 rounded-full bg-cyan-400/20 p-4">
-              <Leaf className="h-10 w-10 text-cyan-300" />
+        <GlassPanel className="relative overflow-hidden p-8 md:p-10">
+          <HolographicStamp size="sm" />
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/70 to-transparent"
+            animate={{ opacity: [0.3, 0.85, 0.35] }}
+            transition={{ duration: 4.5, repeat: Infinity }}
+          />
+
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-cyan-300/80">
+                Secure uplink
+              </p>
+              <h1 className="mt-3 flex items-center gap-2 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+                <Fingerprint className="h-7 w-7 text-cyan-300" aria-hidden />
+                Authenticate
+              </h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Municipal AI gateway · encrypted environmental intelligence channel.
+              </p>
             </div>
-
-            <h1 className="text-3xl font-bold text-white">
-              Smart Waste Portal
-            </h1>
-
-            <p className="mt-2 text-sm text-cyan-100/80">
-              AI-powered intelligent waste management access system
-            </p>
+            <motion.div
+              animate={{ rotate: [0, 8, -6, 0] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+              className="hidden rounded-2xl border border-emerald-400/35 bg-emerald-500/10 p-3 shadow-[0_0_24px_rgba(52,211,153,0.25)] sm:block"
+            >
+              <ShieldCheck className="h-8 w-8 text-emerald-300" aria-hidden />
+            </motion.div>
           </div>
 
-          <form className="space-y-5" onSubmit={onSubmit}>
-            <div>
-              <label className="mb-2 block text-sm text-cyan-100">
-                Username
-              </label>
+          <div className={`my-8 ${neonDivider}`} />
 
+          <form className="space-y-5" onSubmit={onSubmit}>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.08, duration: 0.45 }}
+            >
+              <label className={ecoLabelClass} htmlFor="username">
+                Operator ID
+              </label>
               <input
+                id="username"
+                name="username"
                 type="text"
                 required
-                placeholder="Enter username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                className="w-full rounded-xl border border-cyan-400/20 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40"
+                autoComplete="username"
+                placeholder="citizen.handle"
+                className={ecoInputClass}
               />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm text-cyan-100">
-                Password
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: -12 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.14, duration: 0.45 }}
+            >
+              <label className={ecoLabelClass} htmlFor="password">
+                Access key
               </label>
-
               <input
+                id="password"
+                name="password"
                 type="password"
                 required
-                placeholder="Enter password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-cyan-400/20 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40"
+                autoComplete="current-password"
+                placeholder="••••••••"
+                className={ecoInputClass}
               />
-            </div>
+            </motion.div>
 
             <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-400 py-3 font-semibold text-slate-900 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:opacity-75"
+              whileHover={{ scale: loading ? 1 : 1.02 }}
+              whileTap={{ scale: loading ? 1 : 0.98 }}
+              className={`${ecoPrimaryButton} mt-2 w-full`}
             >
-              <LogIn className="h-5 w-5" />
-
-              {loading ? "Authenticating..." : "Access Dashboard"}
+              <LogIn className="h-4 w-4" aria-hidden />
+              {loading ? "Negotiating keys…" : "Establish session"}
             </motion.button>
           </form>
 
-          {message && (
-            <p
-              className={`mt-4 text-center text-sm ${
-                isError ? "text-red-300" : "text-emerald-300"
-              }`}
+          {message ? (
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-4 rounded-xl border border-rose-500/35 bg-rose-500/10 px-3 py-2 text-sm text-rose-100"
+              role="alert"
             >
               {message}
-            </p>
-          )}
+            </motion.p>
+          ) : null}
 
-          <div className="mt-6 text-center text-sm text-cyan-100/70">
-            Don’t have an account?{" "}
-            <Link
-              to="/register"
-              className="font-semibold text-cyan-300 hover:text-cyan-200"
-            >
-              Register
+          <div className={`mt-8 ${neonDivider}`} />
+
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            No uplink yet?{" "}
+            <Link to="/register" className={ecoLinkClass}>
+              Register citizen node
             </Link>
-          </div>
-        </div>
+          </p>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            <Link to="/" className={ecoLinkClass}>
+              Return to overview
+            </Link>
+          </p>
+        </GlassPanel>
       </motion.div>
-
-      <div className="absolute left-10 top-10 h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl" />
-      <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-emerald-400/20 blur-3xl" />
     </main>
   );
 }

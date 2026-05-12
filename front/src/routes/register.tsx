@@ -1,230 +1,232 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { MapPin, UserPlus } from "lucide-react";
+import { MapPin, Satellite, UserPlus } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
-import BackButton from "@/components/BackButton";
-import { register } from "@/lib/api";
+
+import { GlassPanel } from "@/components/eco-tech/GlassPanel";
+import { HolographicStamp } from "@/components/eco-tech/HolographicStamp";
+import {
+  ecoGhostButton,
+  ecoInputClass,
+  ecoLabelClass,
+  ecoLinkClass,
+  ecoPrimaryButton,
+  neonDivider,
+} from "@/components/eco-tech/ecoTheme";
+import { postForm } from "@/lib/api";
 
 export const Route = createFileRoute("/register")({
-  component: RegisterPage,
+  component: RegisterTemplate,
 });
 
-function RegisterPage() {
-  const navigate = useNavigate();
-
+function RegisterTemplate() {
+  const [lat, setLat] = useState<string>("");
+  const [lon, setLon] = useState<string>("");
+  const [coordsHint, setCoordsHint] = useState("Awaiting geo-lock from map uplink.");
+  const [feedback, setFeedback] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    function consumeCoordinates() {
-      const raw = localStorage.getItem("swm:selectedCoords");
-      if (!raw) {
-        return;
-      }
-
-      try {
-        const parsed = JSON.parse(raw) as {
-          lat?: number;
-          lon?: number;
-        };
-        if (typeof parsed.lat === "number" && typeof parsed.lon === "number") {
-          setLatitude(parsed.lat);
-          setLongitude(parsed.lon);
-        }
-      } catch {
-        // Ignore malformed local storage content.
+    function onMessage(event: MessageEvent) {
+      if (event.origin !== window.location.origin) return;
+      const data = event.data as { lat?: unknown; lon?: unknown };
+      if (typeof data.lat === "number" && typeof data.lon === "number") {
+        const la = data.lat.toFixed(6);
+        const lo = data.lon.toFixed(6);
+        setLat(la);
+        setLon(lo);
+        setCoordsHint(`Locked · ${la}, ${lo}`);
+        setFeedback({ kind: "ok", text: "Coordinates synchronized." });
       }
     }
-
-    function onStorage(event: StorageEvent) {
-      if (event.key === "swm:selectedCoords") {
-        consumeCoordinates();
-      }
-    }
-
-    consumeCoordinates();
-    window.addEventListener("storage", onStorage);
-    window.addEventListener("focus", consumeCoordinates);
-    return () => {
-      window.removeEventListener("storage", onStorage);
-      window.removeEventListener("focus", consumeCoordinates);
-    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
   }, []);
+
+  function openMap() {
+    window.open("/map", "Map", "width=950,height=650,resizable=yes");
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setFeedback(null);
+    const form = event.currentTarget;
+    const username = String(new FormData(form).get("username") || "").trim();
+    const password = String(new FormData(form).get("password") || "");
 
-    if (latitude === null || longitude === null) {
-      setMessage("Please select your location from the smart map before registration.");
-      setIsError(true);
+    if (!username || !password) {
+      setFeedback({ kind: "err", text: "Username and password are required." });
       return;
     }
+    if (!lat || !lon) {
+      setFeedback({ kind: "err", text: "Acquire coordinates from the holographic map interface." });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.set("username", username);
+    formData.set("password", password);
+    formData.set("latitude", lat);
+    formData.set("longitude", lon);
 
     setLoading(true);
-    setMessage("");
-    setIsError(false);
-
-    const response = await register({
-      username: username.trim(),
-      password,
-      latitude,
-      longitude,
-    });
-
-    if (response.ok) {
-      setMessage(response.message);
-      setIsError(false);
-      navigate({ to: "/login" });
+    try {
+      await postForm("/api/register", formData);
+      setFeedback({ kind: "ok", text: "Node provisioned. You may authenticate." });
+      form.reset();
+      setLat("");
+      setLon("");
+      setCoordsHint("Awaiting geo-lock from map uplink.");
+    } catch (err) {
+      setFeedback({
+        kind: "err",
+        text: err instanceof Error ? err.message : "Registration failed.",
+      });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setMessage(response.message);
-    setIsError(true);
-    setLoading(false);
-  }
-
-  function openMap() {
-    window.open("/map?select=1", "_blank", "width=1000,height=700");
   }
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10">
-      <BackButton />
+    <main className="relative mx-auto flex min-h-[calc(100vh-64px)] w-full max-w-4xl items-center px-4 py-16">
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 22 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="relative z-10 w-full max-w-2xl"
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full"
       >
-        <div className="rounded-3xl border border-cyan-400/30 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
-          <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-cyan-400/20">
-              <UserPlus className="h-10 w-10 text-cyan-300" />
+        <GlassPanel className="relative overflow-hidden p-8 md:p-10">
+          <HolographicStamp size="sm" />
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-emerald-300/85">
+                Citizen provisioning
+              </p>
+              <h1 className="mt-3 flex items-center gap-2 text-2xl font-semibold tracking-tight text-white md:text-3xl">
+                <UserPlus className="h-7 w-7 text-emerald-300" aria-hidden />
+                Register uplink
+              </h1>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                Attach your geo-coordinates so Nexus can orchestrate pickups against live municipal meshes.
+              </p>
             </div>
-
-            <h1 className="text-4xl font-bold text-white">
-              Smart City Registration
-            </h1>
-
-            <p className="mt-3 text-sm text-cyan-100/80">
-              Join the intelligent AI-powered waste management ecosystem
-            </p>
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
+              className="rounded-2xl border border-cyan-400/35 bg-cyan-500/10 p-3 shadow-[0_0_28px_rgba(34,211,238,0.25)]"
+            >
+              <Satellite className="h-8 w-8 text-cyan-200" aria-hidden />
+            </motion.div>
           </div>
 
-          <form
-            className="grid gap-5 md:grid-cols-2"
-            onSubmit={onSubmit}
-          >
-            <div>
-              <label className="mb-2 block text-sm text-cyan-100">
-                Username
-              </label>
+          <div className={`my-8 ${neonDivider}`} />
 
+          <form className="grid gap-5 md:grid-cols-2" onSubmit={onSubmit}>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.06 }}
+              className="md:col-span-1"
+            >
+              <label className={ecoLabelClass} htmlFor="username">
+                Operator ID
+              </label>
               <input
+                id="username"
+                name="username"
+                className={ecoInputClass}
+                placeholder="citizen.handle"
                 type="text"
                 required
-                placeholder="Choose username"
-                value={username}
-                onChange={(event) => setUsername(event.target.value)}
-                className="w-full rounded-xl border border-cyan-400/20 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40"
+                autoComplete="username"
               />
-            </div>
-
-            <div>
-              <label className="mb-2 block text-sm text-cyan-100">
-                Password
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+              className="md:col-span-1"
+            >
+              <label className={ecoLabelClass} htmlFor="password">
+                Access key
               </label>
-
               <input
+                id="password"
+                name="password"
+                className={ecoInputClass}
+                placeholder="••••••••"
                 type="password"
                 required
-                placeholder="Choose password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-xl border border-cyan-400/20 bg-black/30 px-4 py-3 text-white outline-none transition focus:border-cyan-300 focus:ring-2 focus:ring-cyan-400/40"
+                autoComplete="new-password"
               />
-            </div>
+            </motion.div>
 
-            <div className="md:col-span-2 rounded-2xl border border-cyan-400/20 bg-black/20 p-5">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-white">
-                    Geo Location Mapping
-                  </h2>
-
-                  <p className="mt-1 text-sm text-cyan-100/70">
-                    Attach your location for optimized waste coordination
-                  </p>
-                </div>
-
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.14 }}
+              className="rounded-2xl border border-cyan-500/25 bg-slate-950/55 p-5 shadow-inner shadow-cyan-500/10 backdrop-blur-xl md:col-span-2"
+            >
+              <p className={ecoLabelClass}>Geo intelligence lock</p>
+              <div className="mt-3 flex flex-wrap gap-3">
                 <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   type="button"
                   onClick={openMap}
-                  className="flex items-center gap-2 rounded-xl bg-cyan-400 px-4 py-3 font-semibold text-slate-900"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`${ecoPrimaryButton} gap-2`}
                 >
-                  <MapPin className="h-5 w-5" />
-                  Open Map
+                  <MapPin className="h-4 w-4" aria-hidden />
+                  Open holographic map
                 </motion.button>
               </div>
-
-              <div className="mt-5 rounded-xl border border-cyan-400/20 bg-cyan-400/5 p-4">
-                {latitude !== null && longitude !== null ? (
-                  <p className="text-sm text-emerald-300">
-                    Coordinates selected: {latitude.toFixed(6)}, {longitude.toFixed(6)}
-                  </p>
-                ) : (
-                  <p className="text-sm text-cyan-100/70">No coordinates selected yet.</p>
-                )}
-              </div>
-            </div>
+              <p className="mt-4 text-sm text-muted-foreground">{coordsHint}</p>
+            </motion.div>
 
             <div className="md:col-span-2">
               <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-emerald-400 py-4 font-bold text-slate-900 shadow-lg transition disabled:cursor-not-allowed disabled:opacity-75"
+                whileHover={{ scale: loading ? 1 : 1.01 }}
+                whileTap={{ scale: loading ? 1 : 0.99 }}
+                className={`${ecoPrimaryButton} w-full`}
               >
-                {loading
-                  ? "Creating Smart Account..."
-                  : "Register Account"}
+                {loading ? "Provisioning…" : "Commit registration"}
               </motion.button>
             </div>
           </form>
 
-          {message && (
-            <p
-              className={`mt-5 text-center text-sm ${
-                isError ? "text-red-300" : "text-emerald-300"
+          {feedback ? (
+            <motion.p
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`mt-4 rounded-xl border px-3 py-2 text-sm ${
+                feedback.kind === "err"
+                  ? "border-rose-500/35 bg-rose-500/10 text-rose-100"
+                  : "border-emerald-500/35 bg-emerald-500/10 text-emerald-100"
               }`}
+              role="status"
             >
-              {message}
-            </p>
-          )}
+              {feedback.text}
+            </motion.p>
+          ) : null}
 
-          <div className="mt-6 text-center text-sm text-cyan-100/70">
-            Already registered?{" "}
-            <Link
-              to="/login"
-              className="font-semibold text-cyan-300 hover:text-cyan-200"
-            >
-              Access Portal
+          <div className={`mt-8 ${neonDivider}`} />
+
+          <p className="mt-5 text-sm text-muted-foreground">
+            Already cleared?{" "}
+            <Link to="/login" className={ecoLinkClass}>
+              Sign in
             </Link>
-          </div>
-        </div>
+          </p>
+          <Link
+            to="/"
+            className={`${ecoGhostButton} mt-3 inline-flex w-full justify-center border-transparent bg-transparent`}
+          >
+            Back to Nexus overview
+          </Link>
+        </GlassPanel>
       </motion.div>
-
-      <div className="absolute left-0 top-0 h-96 w-96 rounded-full bg-cyan-400/20 blur-3xl" />
-      <div className="absolute bottom-0 right-0 h-96 w-96 rounded-full bg-emerald-400/20 blur-3xl" />
     </main>
   );
 }
